@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>布偶猫 v2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:transparent;overflow:hidden;
+  width:100vw;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;
+}
+.cat{
+  width:min(65vw,65vh);height:min(65vw,65vh);
+  cursor:grab;transition:transform .15s;position:relative;
+}
+.cat:active{cursor:grabbing}
+.cat.pet{transform:scale(1.08)}
+.cat.fling{transition:transform .6s cubic-bezier(.25,.1,.25,1)}
+.cat.stretch .tail-group{animation:tailStretch .6s ease-out}
+.cat.yawn .mouth{animation:yawnMouth .8s ease-out}
+svg{width:100%;height:100%}
+
+@keyframes blink{0%,90%,100%{transform:scaleY(1)}95%{transform:scaleY(.05)}}
+.eye-l,.eye-r{transform-origin:center;animation:blink 4s infinite}
+.eye-r{animation-delay:.15s}
+
+@keyframes tail{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(15deg)}}
+.tail-group{transform-origin:420px 560px;animation:tail 3s ease-in-out infinite}
+
+@keyframes tailStretch{0%{transform:rotate(-5deg)}50%{transform:rotate(30deg)}100%{transform:rotate(-5deg)}}
+
+@keyframes earL{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg)}}
+@keyframes earR{0%,100%{transform:rotate(0)}50%{transform:rotate(8deg)}}
+.ear-left{transform-origin:250px 100px;animation:earL 5s ease-in-out infinite}
+.ear-right{transform-origin:420px 100px;animation:earR 5s ease-in-out infinite}
+
+@keyframes breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.03)}}
+.body-breath{transform-origin:335px 340px;animation:breathe 3s ease-in-out infinite}
+
+@keyframes yawnMouth{0%{transform:scaleY(1)}50%{transform:scaleY(2.5)}100%{transform:scaleY(1)}}
+
+.hidden-face{opacity:0;transition:opacity .3s}
+.cat.show-hidden .hidden-face{opacity:1}
+.cat.show-hidden .normal-face{opacity:.3}
+
+.heart{opacity:0;transition:all .5s ease-out}
+.cat.love .heart{opacity:1;animation:floatUp 1.2s ease-out forwards}
+@keyframes floatUp{0%{transform:translateY(0) scale(.5);opacity:1}100%{transform:translateY(-80px) scale(1.2);opacity:0}}
+
+/* 睡觉 */
+.sleepy-overlay{opacity:0;transition:opacity 1s}
+.cat.sleeping .sleepy-overlay{opacity:1}
+.cat.sleeping .normal-face{opacity:.2}
+.cat.sleeping .tail-group{animation-duration:6s}
+.cat.sleeping .body-breath{animation-duration:5s}
+@keyframes zzz{0%{opacity:0;transform:translate(0,0) scale(.5)}50%{opacity:1}100%{opacity:0;transform:translate(15px,-30px) scale(1)}}
+.z{opacity:0}
+.cat.sleeping .z1{animation:zzz 3s infinite}
+.cat.sleeping .z2{animation:zzz 3s .8s infinite}
+.cat.sleeping .z3{animation:zzz 3s 1.6s infinite}
+
+.bubble{
+  position:absolute;background:white;border-radius:16px;
+  padding:8px 14px;font-size:14px;color:#555;
+  top:-55px;left:50%;transform:translateX(-50%);
+  opacity:0;box-shadow:0 2px 12px rgba(0,0,0,.1);
+  white-space:nowrap;pointer-events:none;
+  transition:opacity .2s;z-index:10;
+}
+.bubble.show{opacity:1}
+.bubble::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid white}
+
+/* 摸头计数 */
+.pet-count{position:absolute;bottom:10px;right:10px;font-size:11px;color:#bbb;opacity:0;transition:opacity .3s}
+</style>
+</head>
+<body>
+
+<div class="cat" id="cat">
+  <div class="bubble" id="bubble"></div>
+  <svg viewBox="0 0 670 620" xmlns="http://www.w3.org/2000/svg">
+    <g class="tail-group">
+      <path d="M420 540 Q480 500 510 540 Q530 570 500 590 Q470 600 430 570Z" fill="#D4C5B9" stroke="#B8A89A" stroke-width="2"/>
+      <path d="M500 590 Q520 610 490 620 Q460 610 470 590Z" fill="#F5EDE6"/>
+    </g>
+
+    <ellipse class="body-breath" cx="335" cy="380" rx="120" ry="140" fill="#F5EDE6"/>
+    <ellipse cx="335" cy="400" rx="70" ry="90" fill="#FFFBF7"/>
+
+    <ellipse cx="260" cy="510" rx="28" ry="18" fill="#F5EDE6"/>
+    <ellipse cx="410" cy="510" rx="28" ry="18" fill="#F5EDE6"/>
+    <ellipse cx="255" cy="515" rx="10" ry="8" fill="#D4C5B9"/>
+    <ellipse cx="415" cy="515" rx="10" ry="8" fill="#D4C5B9"/>
+
+    <ellipse cx="335" cy="180" rx="95" ry="85" fill="#F5EDE6"/>
+
+    <g class="ear-left">
+      <polygon points="250,115 220,30 290,90" fill="#D4C5B9"/>
+      <polygon points="250,110 230,50 280,90" fill="#F0C0C0"/>
+    </g>
+    <g class="ear-right">
+      <polygon points="420,115 450,30 380,90" fill="#D4C5B9"/>
+      <polygon points="420,110 440,50 390,90" fill="#F0C0C0"/>
+    </g>
+
+    <ellipse cx="335" cy="195" rx="75" ry="55" fill="#D4C5B9"/>
+
+    <g class="normal-face">
+      <ellipse class="eye-l" cx="305" cy="175" rx="16" ry="18" fill="#5B9BD5"/>
+      <ellipse class="eye-r" cx="365" cy="175" rx="16" ry="18" fill="#5B9BD5"/>
+      <ellipse cx="305" cy="175" rx="10" ry="14" fill="#1A1A2E"/>
+      <ellipse cx="365" cy="175" rx="10" ry="14" fill="#1A1A2E"/>
+      <circle cx="300" cy="168" r="4" fill="white" opacity=".8"/>
+      <circle cx="360" cy="168" r="4" fill="white" opacity=".8"/>
+    </g>
+
+    <g class="hidden-face">
+      <path d="M286 175 Q305 162 324 175" fill="none" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
+      <path d="M346 175 Q365 162 384 175" fill="none" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g class="mouth">
+      <ellipse cx="335" cy="200" rx="7" ry="5" fill="#F0A0A0"/>
+      <path d="M335 205 L335 215" stroke="#B8A89A" stroke-width="2"/>
+      <path d="M320 215 Q335 225 335 215" fill="none" stroke="#B8A89A" stroke-width="2"/>
+      <path d="M350 215 Q335 225 335 215" fill="none" stroke="#B8A89A" stroke-width="2"/>
+    </g>
+
+    <line x1="280" y1="195" x2="220" y2="185" stroke="#CCC" stroke-width="1.5"/>
+    <line x1="280" y1="205" x2="215" y2="210" stroke="#CCC" stroke-width="1.5"/>
+    <line x1="390" y1="195" x2="450" y2="185" stroke="#CCC" stroke-width="1.5"/>
+    <line x1="390" y1="205" x2="455" y2="210" stroke="#CCC" stroke-width="1.5"/>
+
+    <g class="heart" transform="translate(280,380)">
+      <path d="M0 10 A10 10 0 0 1 20 10 A10 10 0 0 1 40 10 Q40 25 20 38 Q0 25 0 10Z" fill="#FF6B8A"/>
+    </g>
+
+    <!-- 睡觉Zzz -->
+    <g class="sleepy-overlay">
+      <text class="z z1" x="420" y="120" font-size="18" fill="#888" font-family="sans-serif">z</text>
+      <text class="z z2" x="440" y="100" font-size="14" fill="#999" font-family="sans-serif">z</text>
+      <text class="z z3" x="455" y="80" font-size="11" fill="#aaa" font-family="sans-serif">z</text>
+    </g>
+  </svg>
+</div>
+
+<script>
+const cat=document.getElementById('cat');
+const bubble=document.getElementById('bubble');
+let clickCount=0,clickTimer=null,dragX=0,dragY=0,startX=0,startY=0;
+let lastInteraction=Date.now();
+let totalPets=0;
+let isSleeping=false;
+
+// 时段感知
+const hourMsgs={
+  morning:['早啊','还没睡醒','有早饭吗','太阳晒屁股了'],
+  noon:['该吃饭了','好困','午休一下？'],
+  afternoon:['好无聊','你在干嘛呢','想出去走走'],
+  evening:['天快黑了','你什么时候回来','饿了吗'],
+  night:['还不睡吗','困了','熬夜对身体不好','你看我眼睛都睁不开了'],
+  late:['……','已经这么晚了','你是不是不要我了']
+};
+
+function getTimeMsg(){
+  const h=new Date().getHours();
+  let pool;
+  if(h>=5&&h<10)pool=hourMsgs.morning;
+  else if(h>=10&&h<13)pool=hourMsgs.noon;
+  else if(h>=13&&h<17)pool=hourMsgs.afternoon;
+  else if(h>=17&&h<21)pool=hourMsgs.evening;
+  else if(h>=21&&h<2)pool=hourMsgs.night;
+  else pool=hourMsgs.late;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+// 孤独递进
+const idleMsgs=[
+  '喵~','好无聊呀','你在哪','理我一下',
+  '我数到三','一','二','二点五',
+  '……','果然不被爱的是小三','你手机坏了吗','怎么收不到你消息',
+  '还没有轮到我吗','我自闭了','算了，我自己玩','喵——（超大声）'
+];
+
+function getIdleMsg(idleLevel){
+  if(idleLevel<3)return idleMsgs.slice(0,3)[idleLevel];
+  if(idleLevel<6)return idleMsgs[3+Math.floor(Math.random()*3)];
+  if(idleLevel<10)return idleMsgs[6+Math.floor(Math.random()*5)];
+  return idleMsgs[11+Math.floor(Math.random()*5)];
+}
+
+function showBubble(txt){
+  bubble.textContent=txt;
+  bubble.classList.add('show');
+  setTimeout(()=>bubble.classList.remove('show'),1800);
+}
+
+// 单击
+cat.addEventListener('click',e=>{
+  if(Math.abs(e.clientX-startX)>5||Math.abs(e.clientY-startY)>5)return;
+  lastInteraction=Date.now();
+  if(isSleeping)wakeUp();
+  clickCount++;
+  clearTimeout(clickTimer);
+  clickTimer=setTimeout(()=>{
+    if(clickCount===1){totalPets++;showBubble(getTimeMsg());}
+    else if(clickCount===2){cat.classList.add('love');setTimeout(()=>cat.classList.remove('love'),1200);showBubble('喜欢你~');}
+    else if(clickCount===3){cat.classList.add('pet');setTimeout(()=>cat.classList.remove('pet'),600);showBubble('喵喵喵！');totalPets+=2;}
+    else if(clickCount>=5){cat.classList.add('show-hidden');setTimeout(()=>cat.classList.remove('show-hidden'),800);showBubble('哼！');}
+    clickCount=0;
+  },300);
+});
+
+// 长按
+let longPress;
+cat.addEventListener('pointerdown',e=>{
+  startX=e.clientX;startY=e.clientY;
+  lastInteraction=Date.now();
+  longPress=setTimeout(()=>{
+    cat.classList.add('show-hidden');
+    setTimeout(()=>cat.classList.remove('show-hidden'),1000);
+    showBubble('😾');
+  },600);
+});
+cat.addEventListener('pointerup',()=>clearTimeout(longPress));
+cat.addEventListener('pointermove',()=>clearTimeout(longPress));
+
+// 拖拽
+cat.addEventListener('pointerdown',e=>{
+  dragX=e.clientX-cat.offsetLeft;
+  dragY=e.clientY-cat.offsetTop;
+  cat.setPointerCapture(e.pointerId);
+});
+cat.addEventListener('pointermove',e=>{
+  if(!cat.hasPointerCapture(e.pointerId))return;
+  cat.style.left=(e.clientX-dragX)+'px';
+  cat.style.top=(e.clientY-dragY)+'px';
+});
+cat.addEventListener('pointerup',e=>{
+  cat.releasePointerCapture(e.pointerId);
+  const dx=e.clientX-startX,dy=e.clientY-startY;
+  if(Math.abs(dx)>60||Math.abs(dy)>60){
+    cat.classList.add('fling');
+    cat.style.left=(e.clientX+dx*1.5)+'px';
+    cat.style.top=(e.clientY+dy*1.5)+'px';
+    setTimeout(()=>{
+      cat.style.left='50%';cat.style.top='50%';
+      cat.classList.remove('fling');
+    },800);
+  }
+});
+cat.style.position='fixed';
+cat.style.left='50%';cat.style.top='50%';
+cat.style.transform='translate(-50%,-50%)';
+
+// 空闲行为
+let idleLevel=0;
+function idleCheck(){
+  const elapsed=(Date.now()-lastInteraction)/1000;
+  if(elapsed>120&&!isSleeping){
+    idleLevel=Math.floor(elapsed/30);
+    if(Math.random()<.4)showBubble(getIdleMsg(idleLevel));
+  }
+  if(elapsed>300&&!isSleeping){
+    goToSleep();
+  }
+}
+
+function goToSleep(){
+  isSleeping=true;
+  cat.classList.add('sleeping');
+  idleLevel=0;
+}
+function wakeUp(){
+  isSleeping=false;
+  cat.classList.remove('sleeping');
+  lastInteraction=Date.now();
+  showBubble('嗯…你回来了');
+}
+
+// 随机行为
+function randomBehavior(){
+  if(isSleeping)return;
+  const r=Math.random();
+  if(r<.25)showBubble(getTimeMsg());
+  else if(r<.35){cat.classList.add('stretch');setTimeout(()=>cat.classList.remove('stretch'),600);}
+  else if(r<.4){cat.classList.add('yawn');setTimeout(()=>cat.classList.remove('yawn'),800);}
+}
+
+setInterval(idleCheck,30000);
+setInterval(randomBehavior,25000);
+
+// 初始
+showBubble(getTimeMsg());
+</script>
+</body>
+</html>

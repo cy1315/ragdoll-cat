@@ -10,8 +10,13 @@ jobs:
         java-version: "17"
         distribution: "temurin"
     - uses: android-actions/setup-android@v3
+    - name: Debug Info
+      run: |
+        ls -la gradlew
+        ls -la gradle/wrapper/
+        cat gradle/wrapper/gradle-wrapper.properties
     - name: Build
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --stacktrace
     - uses: actions/upload-artifact@v4
       with:
         name: ragdoll-cat-debug

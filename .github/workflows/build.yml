@@ -5,18 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Fix Permissions
+      run: chmod +x gradlew
     - uses: actions/setup-java@v4
       with:
         java-version: "17"
         distribution: "temurin"
     - uses: android-actions/setup-android@v3
-    - name: Debug Info
-      run: |
-        ls -la gradlew
-        ls -la gradle/wrapper/
-        cat gradle/wrapper/gradle-wrapper.properties
     - name: Build
-      run: ./gradlew assembleDebug --stacktrace
+      run: ./gradlew assembleDebug
     - uses: actions/upload-artifact@v4
       with:
         name: ragdoll-cat-debug

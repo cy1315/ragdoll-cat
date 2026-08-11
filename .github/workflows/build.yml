@@ -11,19 +11,22 @@ jobs:
         distribution: 'temurin'
     - name: Setup Android SDK
       run: |
-        export ANDROID_SDK=$HOME/android-sdk
-        mkdir -p $ANDROID_SDK/cmdline-tools
+        export SDK=$HOME/android-sdk
+        mkdir -p $SDK/cmdline-tools
         cd /tmp
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         unzip -q commandlinetools-linux-11076708_latest.zip
-        mkdir -p $ANDROID_SDK/cmdline-tools/latest
-        mv cmdline-tools/* $ANDROID_SDK/cmdline-tools/latest/
-        yes | $ANDROID_SDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK "platforms;android-34" "build-tools;34.0.0"
-        echo "sdk.dir=$ANDROID_SDK" > local.properties
-    - name: Build
+        mkdir -p $SDK/cmdline-tools/latest
+        mv cmdline-tools/* $SDK/cmdline-tools/latest/
+        yes | $SDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$SDK "platforms;android-34" "build-tools;34.0.0"
+        echo "sdk.dir=$SDK" > $GITHUB_WORKSPACE/local.properties
+    - name: Regenerate Wrapper
       run: |
-        chmod +x gradlew
-        ./gradlew assembleDebug
+        wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
+        unzip -q gradle-8.2-bin.zip
+        gradle-8.2/bin/gradle wrapper --gradle-version 8.2
+    - name: Build
+      run: ./gradlew assembleDebug
     - uses: actions/upload-artifact@v4
       with:
         name: ragdoll-cat-debug
